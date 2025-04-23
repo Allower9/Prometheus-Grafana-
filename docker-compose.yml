@@ -15,7 +15,9 @@ services:
     environment:
       TZ: "Europe/Moscow"
     networks:
-      - default
+      default:
+        aliases:
+          - prometheus
 
   node-exporter:
     image: prom/node-exporter
@@ -36,7 +38,9 @@ services:
     environment:
       TZ: "Europe/Moscow"
     networks:
-      - default
+      default:
+        aliases:
+          - node-exporter
 
   grafana:
     image: grafana/grafana
@@ -54,7 +58,55 @@ services:
     environment:
       TZ: "Europe/Moscow"
     networks:
-      - default
+      default:
+        aliases:
+          - grafana
+
+  alertmanager:
+    image: prom/alertmanager:v0.21.0
+    user: root
+    ports:
+      - 9093:9093
+    volumes:
+      - ./alertmanager/:/etc/alertmanager/
+    container_name: alertmanager
+    hostname: alertmanager
+    environment:
+      TZ: "Europe/Moscow"
+    restart: unless-stopped
+    command:
+      - '--config.file=/etc/alertmanager/config.yml'
+      - '--storage.path=/etc/alertmanager/data'
+    networks:
+      default:
+        aliases:
+          - alertmanager
+
+  alertmanager-bot:
+    image: metalmatze/alertmanager-bot:0.4.3
+    user: root
+    ports:
+      - 8080:8080
+    container_name: alertmanager-bot
+    hostname: alertmanager-bot
+    environment:
+      TZ: "Europe/Moscow"
+    restart: unless-stopped
+    volumes:
+      - ./data:/data
+    command:
+      - --alertmanager.url=http://alertmanager:9093
+      - --log.level=debug
+      - --store=bolt
+      - --bolt.path=/data/bot.db
+      - --telegram.admin=5877114655
+      - --telegram.token=7708531141:AAEzGF-9SdebZkpZMY-blnJ1Ft4Hr3u6ios
+    depends_on:
+      - alertmanager
+    networks:
+      default:
+        aliases:
+          - alertmanager-bot
 
 networks:
   default:
