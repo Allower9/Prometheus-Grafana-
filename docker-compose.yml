@@ -99,8 +99,8 @@ services:
       - --log.level=debug
       - --store=bolt
       - --bolt.path=/data/bot.db
-      - --telegram.admin=5877114655
-      - --telegram.token=7708531141:AAEzGF-9SdebZkpZMY-blnJ1Ft4Hr3u6ios
+      - --telegram.admin=${{ secrets.TELEGRAM_ID}}
+      - --telegram.token=${{ secrets.TELEGRAM_TOKEN_PROMETHEUS_ALERT }}
     depends_on:
       - alertmanager
     networks:
