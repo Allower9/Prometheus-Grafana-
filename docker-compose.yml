@@ -1,5 +1,7 @@
 version: '3.9'
 
+env_file: .env
+
 services:
   prometheus:
     image: prom/prometheus:latest
